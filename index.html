@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Water Footprint App</title>
-<link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -12,6 +12,8 @@
   <button onclick="searchItem()">Search</button>
 
   <p id="result"></p>
+  <p id="comparePrompt"></p>
+  <p id="compareResult"></p>
 
   <script src="data.js"></script>
   <script src="script.js"></script>
@@ -20,10 +22,16 @@
     function searchItem() {
       const input = document.getElementById("search").value;
       const product = findWaterFootprint(input);
+
       const output = document.getElementById("result");
+      const promptBox = document.getElementById("comparePrompt");
+      const compareBox = document.getElementById("compareResult");
+
+      compareBox.innerHTML = ""; // clear previous comparison
 
       if (!product) {
-        output.innerHTML = "❌ Item not found.";
+        output.innerHTML = "❌ Item not found. Try another name.";
+        promptBox.innerHTML = "";
         return;
       }
 
@@ -34,7 +42,53 @@
       else if (liters <= 2000) level = "🟡 Medium water use";
       else level = "🔴 High water use";
 
-      output.innerHTML = `💧 <b>${product.name}</b>: ${liters} liters/kg <br>${level}`;
+      output.innerHTML =
+        `💧 <b>${product.name}</b>: ${liters} liters/kg <br>${level}`;
+
+      // --- Show compare option ONLY IF HIGH WATER USE ---
+      if (liters > 2000) {
+        promptBox.innerHTML = `
+          🚰 This crop has <b>high water usage</b>.<br>
+          👉 Compare it with another crop:<br><br>
+          <input id="altItem" type="text" placeholder="Enter another crop">
+          <button onclick="compareItems('${product.name}', ${liters})">
+            Compare
+          </button>
+        `;
+      } else {
+        promptBox.innerHTML = "";
+      }
+    }
+
+    function compareItems(item1Name, item1Liters) {
+      const altName = document.getElementById("altItem").value;
+      const product2 = findWaterFootprint(altName);
+      const compareBox = document.getElementById("compareResult");
+
+      if (!product2) {
+        compareBox.innerHTML = "❌ Second item not found.";
+        return;
+      }
+
+      const liters2 = product2.litersPerKg;
+
+      let better = "";
+      let percent = 0;
+
+      if (liters2 < item1Liters) {
+        better = product2.name;
+        percent = Math.round(((item1Liters - liters2) / item1Liters) * 100);
+      } else {
+        better = "(first crop is still lower)";
+      }
+
+      compareBox.innerHTML = `
+        📊 <b>Comparison</b><br>
+        ${item1Name}: ${item1Liters} L/kg<br>
+        ${product2.name}: ${liters2} L/kg<br><br>
+
+        ⭐ <b>${better}</b> uses about <b>${percent}% less water</b> than ${item1Name}.
+      `;
     }
   </script>
 

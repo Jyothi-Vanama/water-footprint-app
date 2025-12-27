@@ -1,9 +1,16 @@
 function findWaterFootprint(itemName) {
-  const name = itemName.toLowerCase();
 
-  // search in dataset
-  const result = waterData.find(product => product.name === name);
+  if (!itemName) return undefined;
 
-  return result; // returns undefined if not found
+  const name = itemName.trim().toLowerCase();
+
+  // exact match first
+  let result = waterData.find(product => product.name === name);
+
+  // if not found, try partial match
+  if (!result) {
+    result = waterData.find(product => product.name.includes(name));
+  }
+
+  return result;
 }
-
