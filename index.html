@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Water Footprint App</title>
+</head>
+<body>
+
+  <h2>Water Footprint Checker</h2>
+
+  <input id="search" type="text" placeholder="Enter product name">
+  <button onclick="searchItem()">Search</button>
+
+  <p id="result"></p>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    function searchItem() {
+      const input = document.getElementById("search").value;
+      const product = findWaterFootprint(input);
+      const output = document.getElementById("result");
+
+      if (!product) {
+        output.innerHTML = "❌ Item not found.";
+        return;
+      }
+
+      const liters = product.litersPerKg;
+
+      let level = "";
+      if (liters < 500) level = "🟢 Low water use";
+      else if (liters <= 2000) level = "🟡 Medium water use";
+      else level = "🔴 High water use";
+
+      output.innerHTML = `💧 <b>${product.name}</b>: ${liters} liters/kg <br>${level}`;
+    }
+  </script>
+
+</body>
+</html>
